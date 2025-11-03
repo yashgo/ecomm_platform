@@ -19,6 +19,33 @@ app = Flask(__name__)
 DATA_FILE = "user_data.json"
 SESSION_TIMEOUT_SECONDS = 5 * 60  # 5 minutes
 
+
+N8N_WEBHOOK_URL = "https://n8n.my8n.xyz/webhook-test/whatsapp-order"
+
+def export_to_n8n(phone, cart, stage="Completed"):
+    total = sum(PRODUCTS[pid]["price"] * qty for pid, qty in cart.items())
+    for pid, qty in cart.items():
+        product = PRODUCTS.get(pid, {})
+        payload = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "phone": phone,
+            "product_name": product.get("name", "Unknown"),
+            "quantity": qty,
+            "price": product.get("price", 0),
+            "total_item": product.get("price", 0) * qty,
+            "grand_total": total,
+            "stage": stage,
+        }
+        try:
+            r = requests.post(N8N_WEBHOOK_URL, json=payload, timeout=10)
+            if r.status_code == 200:
+                print(f"Sent order for {phone} → {product['name']} to n8n.")
+            else:
+                print(f"n8n responded with {r.status_code}: {r.text}")
+        except Exception as e:
+            print(f"Failed to send order data to n8n: {e}")
+
+
 # -------------------- Persistent user data --------------------
 def load_user_data():
     if os.path.exists(DATA_FILE):
@@ -41,10 +68,10 @@ user_sessions = load_user_data()
 
 # -------------------- Product Catalog --------------------
 PRODUCTS = {
-    "1": {"name": "Wireless Mouse", "price": 499},
-    "2": {"name": "Bluetooth Headphones", "price": 999},
-    "3": {"name": "USB-C Charger", "price": 699},
-    "4": {"name": "Laptop Stand", "price": 1299},
+    "1": {"name": "Wireless Mouse", "price": 650},
+    "2": {"name": "Bluetooth Headphones", "price": 799},
+    "3": {"name": "USB-C Charger", "price": 1499},
+    "4": {"name": "Laptop Stand", "price": 699},
 }
 
 # -------------------- WhatsApp send helper --------------------
@@ -286,6 +313,7 @@ def incoming_messages():
                 if user.get("stage") == "awaiting_checkout_confirm":
                     if text in ["confirm", "yes", "y"]:
                         total = sum(PRODUCTS[pid]["price"] * qty for pid, qty in cart.items())
+                        export_to_n8n(phone, cart, stage="Completed")
                         send_whatsapp_message(
                             phone,
                             f"✅ Checkout complete! Your card was charged ₹{total}.\nThank you for shopping with ShopEase! 🛍️",
