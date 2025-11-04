@@ -30,6 +30,32 @@ Before proceeding with the installation, make sure the following requirements ar
 
 ## ⚙️ Installation Instructions
 
+### Install ngrok
+#### Install ngrok Agent
+1. Download the latest ngrok binary for the linux distro from [ngrok download page](https://ngrok.com/download/linux?tab=download). Select the operating system as Linux, select the version, and copy the link that appears in the Download button. Below is an example for x86-64:
+```bash
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+```
+2. Unzip the downloaded file and move it to a directory in the PATH, i.e., `/usr/local/bin`:
+```bash
+sudo tar xvzf ./ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
+```
+ngrok is now installed on the system.
+
+### Authenticate the ngrok Agent
+1. Login to [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). Create account if not created.
+2. Copy the Authtoken provided in the dashboard.
+3. Authenticate the ngrok agent by using the command:
+```bash
+ngrok authtoken NGROK_AUTHTOKEN
+```
+**Note:** Replace the NGROK_AUTHTOKEN with the token copied from the dashboard.  
+
+ngrok is now installed and running on the system.
+
+
+## 🚀 Running the Chatbot
+
 ### Create a Authentication Token
 1. Go to WhatsApp Business Settings and select the app.
 2. Go to Users \> System Users.
@@ -53,7 +79,6 @@ PHONE_NUMBER_ID = <<YOUR-WHATSAPP-BUSINESS-PHONE-NUMBER-ID>>
 ACCESS_TOKEN = <<YOUR-SYSTEM-USER-ACCESS-TOKEN>>
 ```
 
-
 ### Run the Flask Server
 ```bash
 python app.py
@@ -66,9 +91,7 @@ It will start on http://127.0.0.1:5000/.
 ```bash
 ngrok http 5000
 ```
-
 It will provide an HTTPS URL: ` https://egal-grizzly-bayleigh.ngrok-free.dev `
-
 
 ### Configure Webhook in Meta Developer Console
 1. Go to Developers Portal \> My Apps \> Your WhatsApp App.
@@ -81,4 +104,14 @@ It will provide an HTTPS URL: ` https://egal-grizzly-bayleigh.ngrok-free.dev `
     - message_template_status_update (optional)
 5. Click Verify and Save.
 
+### Usage
+- Open WhatsApp and send a message (___e.g., Hi___) to the registered WhatsApp Business number.
+- The bot will respond with a main menu.
+- You can:
+    - Type `1` to browse products
+    - Type `2` to view the cart
+    - Type `3` to edit the cart
+    - Type `4` to checkout
+    - Type `5` for Customer Support
+    - Type `menu` or `6` anytime to return to help menu
 
